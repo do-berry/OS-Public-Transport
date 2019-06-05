@@ -65,8 +65,8 @@ void stop() {
 }
 
 void * sitInTheBus(int id) {
-  while(run) {
-    unique_lock<mutex> lck(passengers[id]->mtx);
+  while(run) {/*
+    unique_lock<mutex> lck(threadMutex);
 
     // wysiad
     if (arrived.load() == true) {
@@ -162,7 +162,7 @@ void * sitInTheBus(int id) {
     while(arrived.load() == false) {
       threadCV.wait(lck);
     }
-  }
+  }*/
   }
 }
 
@@ -210,9 +210,9 @@ void * goOrStop() {
 void init() {
   howManyInTheBus.store(0);
   actual.store(true);
-  ready.store(false);
-  stopped.store(true);
-  arrived.store(true);
+  ready.store(true);
+  stopped.store(false);
+  //arrived.store(false);
 }
 
 void createThreads() {
@@ -261,7 +261,7 @@ void start() {
   wrefresh(windows[1]);
   char choice = 0;
   init();
-  stop();
+  //stop();
   createBusThread();
   createThreads();
   while (run) {
