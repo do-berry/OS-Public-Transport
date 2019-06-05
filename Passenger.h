@@ -8,6 +8,7 @@ using namespace std;
 class Passenger {
 public:
   bool isAlreadyArrived;
+  bool goes;
   bool busStop;             // true: A; false: B
   mutex mtx;
   condition_variable cv;

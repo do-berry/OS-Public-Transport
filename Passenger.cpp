@@ -8,6 +8,7 @@ using namespace std;
 Passenger::Passenger() {
   this->isAlreadyArrived = false;
   this->busStop = rand() % 2;
+  this->goes = false;
 }
 
 Passenger::~Passenger() {}
