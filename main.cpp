@@ -61,16 +61,13 @@ void writeToB(int x) {
 
 void go(bool value) {
   actual.store(value);
-  // ready.store(true);
   stopped.store(false);
-  // arrived.store(false);
 }
 
 void stop(bool value) {
   actual.store(value);
-  // ready.store(false);
   stopped.store(true);
-//  arrived.store(true);
+  ready.store(false);
 }
 
 void * lights() {
@@ -123,8 +120,8 @@ void * sitInTheBus(int id) {
           }
           if (howManyInTheBus == 5 || aBusStop == 0) {
             ready.store(true);
-            this_thread::sleep_for(chrono::milliseconds(500));
-            writeToBus(10, "ready!\n");
+            //this_thread::sleep_for(chrono::milliseconds(500));
+            //writeToBus(10, "ready!\n");
           }
         } else if (actual.load() == false && howManyInTheBus.load() < 5) {
           if (howManyInTheBus.load() < 5 || aBusStop > 0) {
@@ -137,17 +134,29 @@ void * sitInTheBus(int id) {
           }
           if (howManyInTheBus == 5 || bBusStop == 0) {
             ready.store(true);
-            this_thread::sleep_for(chrono::milliseconds(500));
-            writeToBus(10, "ready!\n");
+            //this_thread::sleep_for(chrono::milliseconds(500));
+            //writeToBus(10, "ready!\n");
           }
         }
         sitMutex.unlock();
+        busCV.notify_one();
+        //writeToBus(9, "notified\n");
+        while(!stopped) {
+          //writeToBus(9, "waits\n");
+          passengers[id]->cv.wait(lck);
+        }
       }
     }
 
 
 
-    
+
+  }
+}
+
+void notifyAllThreads() {
+  for (int i = 0; i < howMany; i++) {
+    passengers[i]->cv.notify_one();
   }
 }
 
@@ -183,6 +192,7 @@ void * goOrStop() {
           }
         }
         stop(true);
+        notifyAllThreads();
       }
     } else {
       if (!ready && stopped) {
@@ -213,6 +223,7 @@ void * goOrStop() {
           }
         }
         stop(false);
+        notifyAllThreads();
       }
     }
   }
