@@ -97,63 +97,58 @@ void * lights() {
   }
 }
 
-void * sitInTheBus(int id) {/*
-  unique_lock<mutex> lck(threadMutex);
+void * sitInTheBus(int id) {
+  unique_lock<mutex> lck(passengers[id]->mtx);
   while(run) {
     // jesli jest na naszym przystanku
-    // jesli (goes) -> false
-    // : wysiadka
+    // sprawdzamy czy stoi [dla pewnosci]
+    // sprawdzamy jaki przystanek
+    // jesli tak to dopoki HMITB < 5 lub jest ktos na przystanku
+    //    HMITB++
+    //    na przystanku++
+    //    zmiana u pasazera
+    //    
+    // jesli nie to nic nie robi
     if (actual.load() == passengers[id]->busStop) {
-      if (passengers[id]->goes) {
-        --howManyInTheBus;
-        passengers[id]->goes = false;
-        if (actual.load() == true) {
-          ++bBusStop;
-          writeToB(bBusStop);
-        } else {
-          ++aBusStop;
-          writeToA(aBusStop);
-        }
-        string txt = "W autobusie: " + to_string(howManyInTheBus) + "\n";
-        writeToBus(4, txt);
-      }
-      // probuje wsiasc
-      // dopoki autobus stoi na przystanku
-      while (stopped.load() == true) {
-        // sprawdza czy w autobusie jest miejsce
-        // jesli jest to wsiada
-        // jesli nie to zmieniamy ready -> true
+      if (stopped.load() == true) {
         sitMutex.lock();
-        if (howManyInTheBus < 5) {
-          ++howManyInTheBus;
-          if (actual.load() == true) {
-            --aBusStop;
+        if (actual.load() == true && howManyInTheBus.load() < 5) {
+          if (howManyInTheBus.load() < 5 || aBusStop > 0) {
+            ++howManyInTheBus;
+            aBusStop--;
             passengers[id]->busStop = false;
-          } else {
-            --bBusStop;
-            passengers[id]->busStop = true;
+            writeToA(aBusStop);
+            string txt = "W autobusie: " + to_string(howManyInTheBus) + "\n";
+            writeToBus(4, txt);
           }
-          passengers[id]->goes = true;
-        }
-        sitMutex.unlock();
-        if (actual.load() == true) {
           if (howManyInTheBus == 5 || aBusStop == 0) {
             ready.store(true);
-            busCV.notify_one();
+            this_thread::sleep_for(chrono::milliseconds(500));
+            writeToBus(10, "ready!\n");
           }
-        } else {
+        } else if (actual.load() == false && howManyInTheBus.load() < 5) {
+          if (howManyInTheBus.load() < 5 || aBusStop > 0) {
+            ++howManyInTheBus;
+            bBusStop--;
+            passengers[id]->busStop = true;
+            writeToB(bBusStop);
+            string txt = "W autobusie: " + to_string(howManyInTheBus) + "\n";
+            writeToBus(4, txt);
+          }
           if (howManyInTheBus == 5 || bBusStop == 0) {
             ready.store(true);
-            busCV.notify_one();
+            this_thread::sleep_for(chrono::milliseconds(500));
+            writeToBus(10, "ready!\n");
           }
         }
-        }
-      } else {
-        while (ready.load() == true) {
-          threadCV.wait(lck);
-        }
+        sitMutex.unlock();
       }
-    }*/
+    }
+
+
+
+    
+  }
 }
 
 void * goOrStop() {
@@ -227,8 +222,7 @@ void init() {
   howManyInTheBus.store(0);
   actual.store(true);
   ready.store(false);
-  stopped.store(false);
-  //arrived.store(false);
+  stopped.store(true);
 }
 
 void createThreads() {
