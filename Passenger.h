@@ -10,7 +10,6 @@ class Passenger {
 public:
   bool isAlreadyArrived;
   bool goes;
-  bool inTheBus;
   bool busStop;             // true: A; false: B
   mutex mtx;
   condition_variable cv;

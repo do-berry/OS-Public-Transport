@@ -9,7 +9,6 @@ Passenger::Passenger() {
   this->isAlreadyArrived = false;
   this->busStop = rand() % 2;
   this->goes = false;
-  this->inTheBus = false;
 }
 
 Passenger::~Passenger() {}
