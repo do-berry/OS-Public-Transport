@@ -11,26 +11,21 @@
 #include "Bus.h"
 #include "Screen.h"
 #include "Lights.h"
-#include "common.h"
-
+ 
 using namespace std;
 
-Passenger * passengers [howMany];         // pasazerowie
-Bus * bus;                                // autobus
-thread * threads [howMany + 1];           // pasazerowie + autobus
-Lights * lights;                          // swiatla
+atomic<bool> run (false);
+atomic<int> A{0}, B{0};
+Screen * screen = new Screen();
+//Passenger * passengers [howMany];         // pasazerowie
+Bus * bus = new Bus();                                // autobus
+thread * threads [2];               // pasazerowie + autobus
+Lights * lights = new Lights();                          // swiatla
 
+/*
 void * travel(int id) {
   // todo
 }
-
-void * go() {
-  // todo
-}
-
-/* 
-    tworzenie, usuwanie watkow & main
-*/
 
 void createPassengers() {
   for (int i = 0; i < howMany; i++) {
@@ -45,41 +40,38 @@ void createPassengers() {
     threads[i] = new thread(travel, i);
   }
 }
-
+*/
 void createBus() {
-  bus = new Bus();
-  threads[howMany] = new thread(go);
+  threads[0] = new thread(&bus->go, screen, lights, run);
+  threads[1] = new thread(&lights->beOn, screen, bus, run);
 }
 
-void createLights() {
-  lights = new Lights();
-}
-
-void stopThreads() {
-  for (int i = 0; i < howMany + 1; i++) {
+void stop() {
+  /*for (int i = 0; i < howMany + 1; i++) {
     threads[i]->join();
     delete threads[i];
     if (i < howMany) {
       delete passengers[i];
     }
-  }
+  }*/
+  run.store(false);
+  threads[0]->join();
+  threads[1]->join();
   delete bus;
   delete lights;
+  delete screen;
 }
 
 int main() {
   srand(time(NULL));
   char choice = 0;
   run.store(true);
-  createLights();
   createBus();
-  createPassengers();
+  //createPassengers();
   while (run) {
     cin >> choice;
     if (choice == 'n') {
-      run.store(false);
-      stopThreads();
-      delete screen;
+      stop();
     }
   }
   return 0;

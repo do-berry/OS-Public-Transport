@@ -3,7 +3,7 @@ DEFINES =
 CFLAGS = -std=c++11 -O0 -g
 LIB = -lpthread -lncurses
 
-main: Passenger.o Bus.o Screen.o Lights.o main.o
+main: Lights.o Bus.o Passenger.o Screen.o main.o
 	$(CC) -o main main.o Passenger.o Bus.o Screen.o Lights.o $(LIB)
 
 main.o: main.cpp Passenger.h Bus.h Screen.h Lights.h
