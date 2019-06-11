@@ -6,15 +6,13 @@
 
 using namespace std;
 
-Passenger::Passenger() {
+Passenger::Passenger() {}
+
+Passenger::Passenger(int id) {
   this->isAlreadyArrived = false;
-  this->busStop = rand() % 2;
-  if (this->busStop == 0) {
-    //++A;
-  } else {
-    //++B;
-  }
-  this->goes = false;
+  this->current.store(0);
+  this->travels.store(false);
+
 }
 
 Passenger::~Passenger() {}

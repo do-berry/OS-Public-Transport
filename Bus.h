@@ -9,8 +9,8 @@ using namespace std;
 
 class Bus {
 public:
-  atomic<bool> atA, atB, onRoad;
-  atomic<int> howManyPassengers;
+  atomic<bool> atA, atB, onRoad, empty, full;
+  atomic<int> howManyPassengers, current;
   Bus();
   ~Bus();
 };
