@@ -8,12 +8,8 @@ using namespace std;
 
 class Passenger {
 public:
-  bool isAlreadyArrived;
   atomic<bool> travels;
-  bool busStop;             // 0: A, 1: B
   atomic<int> current;
-  mutex mtx;
-  condition_variable cv;
   Passenger();
   Passenger(int id);
   ~Passenger();

@@ -268,13 +268,11 @@ void getIn(int id)
         if (bus->atA.load() == true)
         {
           --A;
-          //passengers[id]->current.store(1);
           writeToA(-1, id);
         }
         else
         {
           --B;
-          //passengers[id]->current.store(0);
           writeToB(-1, id);
         }
         writeToBus(id + 4, "Watek " + to_string(id) + "\n");
@@ -331,17 +329,17 @@ void createThreads()
 
 void stopThreads()
 {
-  busThread->join();
-  delete busThread;
-  lights->join();
-  delete lights;
-  delete bus;
   for (int i = 0; i < howMany; i++)
-  {
+  { 
     passengerThreads[i]->join();
     delete passengerThreads[i];
     delete passengers[i];
   }
+  busThread->join();
+  lights->join();
+  delete busThread;
+  delete lights;
+  delete bus;
 }
 
 // screen
@@ -363,7 +361,7 @@ void init()
   wrefresh(windows[1]);
   char choice = 0;
   createThreads();
-  while (run)
+  while (run.load() == true)
   {
     cin >> choice;
     if (choice == 'n')
